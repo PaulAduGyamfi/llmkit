@@ -1,6 +1,9 @@
-import asyncio, httpx, random
+import asyncio, httpx, random, time
+import logging
 from typing import Any
 from llmkit.settings import Settings
+
+log = logging.getLogger(__name__)
 
 RETRYABLE_STATUS = frozenset[int]({429, 500, 502, 503, 504})
 
@@ -29,17 +32,34 @@ class LLMClient:
         
         for attempt in range(self._settings.max_retries + 1):
             try:
+                started = time.perf_counter()
                 response = await self._client.request(method, path, json=json)
-            except (httpx.TimeoutException, httpx.ConnectError):
+            except (httpx.TimeoutException, httpx.ConnectError) as e:
+                log.warning("request failed", extra={"ctx": {
+                    "method": method,
+                    "path": path,
+                    "attempt": attempt,
+                    "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
+                    "error": type(e).__name__,
+                }})
                 if attempt == self._settings.max_retries:
                     raise
                 await self._sleep(attempt)
                 continue
+            else:
+                log.info("request attempt", extra={"ctx": {
+                    "method": method,
+                    "path": path,
+                    "status": response.status_code,
+                    "attempt": attempt,
+                    "elapsed_ms": round((time.perf_counter() - started) * 1000, 1)}})
+
             if response.status_code not in RETRYABLE_STATUS:
                 return response
             if attempt == self._settings.max_retries:
                 return response
             await self._sleep(attempt)
+            
 
         return response
 
