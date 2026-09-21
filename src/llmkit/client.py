@@ -8,8 +8,9 @@ log = logging.getLogger(__name__)
 RETRYABLE_STATUS = frozenset[int]({429, 500, 502, 503, 504})
 
 class LLMClient:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None) -> None:
         self._settings = settings
+        self._transport = transport
         self._client: httpx.AsyncClient | None = None
     
     async def __aenter__(self):
@@ -17,7 +18,8 @@ class LLMClient:
             self._client = httpx.AsyncClient(
                 base_url=self._settings.base_url,
                 timeout=httpx.Timeout(connect=5.0,read=self._settings.timeout_s,write=10.0,pool=5.0),
-                headers={"Authorization": f"Bearer {self._settings.provider_api_key}"}
+                headers={"Authorization": f"Bearer {self._settings.provider_api_key}"},
+                transport=self._transport,
             )
         return self
 
