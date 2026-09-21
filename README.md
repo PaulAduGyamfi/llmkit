@@ -39,10 +39,10 @@ from llmkit.settings import get_settings
 
 
 async def main() -> None:
-    configure()                    # JSON logs to stdout
-    request_id.set("req-123")      # tags every log line in this task
+    configure()  # JSON logs to stdout
+    request_id.set("req-123")  # tags every log line in this task
 
-    settings = get_settings()      # validates the environment
+    settings = get_settings()  # validates the environment
     async with LLMClient(settings) as client:
         response = await client.request("GET", "/health")
         print(response.status_code)
