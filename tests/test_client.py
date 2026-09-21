@@ -1,4 +1,3 @@
-from operator import call
 import httpx
 import pytest
 from llmkit.client import LLMClient

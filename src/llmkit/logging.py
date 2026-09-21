@@ -1,7 +1,7 @@
 import json
 import logging
 from contextvars import ContextVar
-from typing import Any
+from typing import cast, Any
 
 request_id: ContextVar[str] = ContextVar[str]("request_id", default="-")
 
@@ -17,7 +17,7 @@ class JsonFormatter(logging.Formatter):
         }
         ctx = getattr(record, "ctx", None)
         if isinstance(ctx, dict):
-            payload.update(ctx)
+            payload.update(cast(dict[str, Any], ctx))
         if record.exc_info:
             payload["exc"] = self.formatException(record.exc_info)
         return json.dumps(payload)

@@ -33,8 +33,8 @@ class LLMClient:
             raise RuntimeError("LLMClient must be used as an async context manager")
         
         for attempt in range(self._settings.max_retries + 1):
+            started = time.perf_counter()
             try:
-                started = time.perf_counter()
                 response = await self._client.request(method, path, json=json)
             except (httpx.TimeoutException, httpx.ConnectError) as e:
                 log.warning("request failed", extra={"ctx": {
@@ -62,8 +62,7 @@ class LLMClient:
                 return response
             await self._sleep(attempt)
             
-
-        return response
+        raise AssertionError("unreachable: loop always returns or raises")
 
     async def _sleep(self, attempt: int) -> None:
         delay = 0.5 * 2 ** attempt

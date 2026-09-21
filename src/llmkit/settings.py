@@ -15,4 +15,4 @@ class Settings(BaseSettings):
     max_retries: int = Field(default=2, ge=0)
 
 def get_settings() -> Settings:
-    return Settings()
+    return Settings() # pyright: ignore[reportCallIssue]
