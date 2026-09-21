@@ -1,7 +1,7 @@
 import json
 import logging
 from contextvars import ContextVar
-from typing import cast, Any
+from typing import Any, cast
 
 request_id: ContextVar[str] = ContextVar[str]("request_id", default="-")
 

@@ -1,5 +1,7 @@
 import pytest
+
 from llmkit.settings import Settings
+
 
 @pytest.fixture
 def settings() -> Settings:
